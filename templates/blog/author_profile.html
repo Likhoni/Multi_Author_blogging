@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ author_profile.username }}'s Profile - Likhoni{% endblock %}
+
+{% block content %}
+<div class="page-header" style="background:#ffffff; padding:2rem; border-radius:var(--radius-lg); border:1px solid var(--border-color); margin-bottom:2.5rem; display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+    <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--secondary)); display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:2rem; font-weight:800;">
+        {{ author_profile.username|slice:":1"|upper }}
+    </div>
+
+    <div>
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+            <h1 class="page-title" style="font-size:1.75rem;">{{ author_profile.username }}</h1>
+            {% if author_profile.is_author %}
+                <span class="role-badge role-author">Author</span>
+            {% else %}
+                <span class="role-badge role-reader">Reader</span>
+            {% endif %}
+        </div>
+        
+        {% if author_profile.bio %}
+            <p style="color:var(--text-muted); margin-top:0.5rem; max-width:600px;">{{ author_profile.bio }}</p>
+        {% else %}
+            <p style="color:var(--text-muted); margin-top:0.5rem; font-style:italic;">No bio provided.</p>
+        {% endif %}
+
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-top:0.5rem;">
+            Joined {{ author_profile.date_joined|date:"F Y" }}
+        </div>
+    </div>
+</div>
+
+<h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">Published Articles by {{ author_profile.username }}</h2>
+
+{% if page_obj %}
+    <div class="posts-grid">
+        {% for post in page_obj %}
+            <article class="post-card">
+                <div class="post-card-img-wrapper">
+                    {% if post.featured_image %}
+                        <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="post-card-img">
+                    {% else %}
+                        <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#94a3b8;">No Image</div>
+                    {% endif %}
+                    <span class="category-badge">{{ post.category.name }}</span>
+                </div>
+                
+                <div class="post-card-body">
+                    <h2 class="post-card-title">
+                        <a href="{% url 'post_detail' slug=post.slug %}">{{ post.title }}</a>
+                    </h2>
+                    
+                    <p class="post-card-excerpt">
+                        {{ post.content|truncatewords:25 }}
+                    </p>
+                    
+                    <div class="post-card-footer">
+                        <span style="font-size:0.85rem; color:var(--text-muted);">{{ post.created_at|date:"M j, Y" }}</span>
+                        <div class="post-meta">
+                            <span>👁️ {{ post.view_count }}</span>
+                            <span>❤️ {{ post.likes.count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <nav class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-link">&laquo; Prev</a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="page-link active">{{ num }}</span>
+                {% else %}
+                    <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="page-link">Next &raquo;</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+
+{% else %}
+    <div style="text-align: center; padding: 3rem 1rem; background: white; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <p style="color: var(--text-muted);">This author hasn't published any articles yet.</p>
+    </div>
+{% endif %}
+
+{% endblock %}

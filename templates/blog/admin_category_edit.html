@@ -1,0 +1,34 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Edit Category: {{ category.name }} - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="form-card" style="max-width: 550px; margin: 2rem auto;">
+    <h1 style="font-size: 1.75rem; font-weight: 800; color: #ffffff; margin-bottom: 1.5rem; text-align: center;">Edit Category</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.name.id_for_label }}" style="color:#cbd5e1;">Category Name</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+                <span style="color:#ef4444; font-size:0.825rem;">{{ form.name.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.description.id_for_label }}" style="color:#cbd5e1;">Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+                <span style="color:#ef4444; font-size:0.825rem;">{{ form.description.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary" style="flex:1;">Save Changes</button>
+            <a href="{% url 'admin_dashboard' %}?tab=categories" class="btn btn-secondary" style="background:#334155; color:#fff; border:none;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

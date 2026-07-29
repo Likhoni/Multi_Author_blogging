@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - Likhoni{% endblock %}
+
+{% block content %}
+<article style="max-width: 860px; margin: 0 auto;">
+    <!-- Post Header -->
+    <header class="post-detail-header">
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;">
+            <a href="{% url 'category_posts' slug=post.category.slug %}" class="pill active">
+                {{ post.category.name }}
+            </a>
+            {% if post.status == 'DRAFT' %}
+                <span class="status-badge status-draft">Draft (Private)</span>
+            {% endif %}
+        </div>
+
+        <h1 class="post-detail-title">{{ post.title }}</h1>
+
+        <div class="post-detail-meta">
+            <div>
+                By <a href="{% url 'author_profile' username=post.author.username %}" class="author-link" style="font-size:1rem;">{{ post.author.username }}</a>
+            </div>
+            <span>•</span>
+            <div>Published {{ post.created_at|date:"F j, Y" }}</div>
+            <span>•</span>
+            <div>👁️ {{ post.view_count }} views</div>
+            <span>•</span>
+            <div>❤️ {{ likes_count }} likes</div>
+        </div>
+
+        {% if user.is_authenticated and user == post.author or user.is_superuser %}
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                <a href="{% url 'post_edit' slug=post.slug %}" class="btn btn-sm btn-secondary">✏️ Edit Post</a>
+                <a href="{% url 'post_delete' slug=post.slug %}" class="btn btn-sm btn-danger">🗑️ Delete Post</a>
+            </div>
+        {% endif %}
+    </header>
+
+    <!-- Featured Image -->
+    {% if post.featured_image %}
+        <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="post-featured-image">
+    {% endif %}
+
+    <!-- Article Content -->
+    <div class="post-content">
+        {{ post.content|linebreaks }}
+    </div>
+
+    <!-- Tags -->
+    {% if post.tags.all %}
+        <div class="post-tags-list">
+            <span style="font-weight:600; color:var(--text-muted); align-self:center;">Tags:</span>
+            {% for tag in post.tags.all %}
+                <a href="{% url 'tag_posts' slug=tag.slug %}" class="tag-badge">#{{ tag.name }}</a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Like & Action Bar -->
+    <div class="interaction-bar">
+        <div>
+            {% if user.is_authenticated %}
+                <form action="{% url 'like_toggle' slug=post.slug %}" method="POST" class="like-btn-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn like-btn {% if user_has_liked %}liked{% endif %}">
+                        ❤️ {% if user_has_liked %}Liked{% else %}Like{% endif %} ({{ likes_count }})
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}?next={{ request.path }}" class="btn like-btn">
+                    ❤️ Like ({{ likes_count }}) - Log in to like
+                </a>
+            {% endif %}
+        </div>
+
+        <div style="color:var(--text-muted); font-weight:600;">
+            💬 {{ comments.count }} Comment{% if comments.count != 1 %}s{% endif %}
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <section class="comments-section">
+        <h3 class="section-title">Discussion ({{ comments.count }})</h3>
+
+        <!-- Comment Form -->
+        {% if user.is_authenticated %}
+            <form action="{% url 'comment_create' slug=post.slug %}" method="POST" style="margin-bottom: 2.5rem;">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ comment_form.text }}
+                </div>
+                <button type="submit" class="btn btn-primary">Post Comment</button>
+            </form>
+        {% else %}
+            <div style="background: #f1f5f9; padding: 1.25rem; border-radius: var(--radius-md); text-align: center; margin-bottom: 2.5rem;">
+                <p>Want to join the conversation?</p>
+                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-sm" style="margin-top:0.5rem;">Log In to Comment</a>
+            </div>
+        {% endif %}
+
+        <!-- Comments List -->
+        {% if comments %}
+            {% for comment in comments %}
+                <div class="comment-card">
+                    <div class="comment-header">
+                        <span class="comment-user">
+                            <a href="{% url 'author_profile' username=comment.user.username %}">{{ comment.user.username }}</a>
+                            {% if comment.user == post.author %}
+                                <span class="role-badge role-author" style="font-size:0.65rem; margin-left:0.25rem;">Author</span>
+                            {% endif %}
+                        </span>
+                        <span class="comment-date">{{ comment.created_at|date:"M j, Y - g:i A" }}</span>
+                    </div>
+
+                    <div class="comment-body">
+                        {{ comment.text|linebreaksbr }}
+                    </div>
+
+                    <!-- Moderation Delete Button -->
+                    {% if user.is_authenticated %}
+                        {% if user == comment.user or user == post.author or user.is_superuser %}
+                            <div class="comment-actions">
+                                <a href="{% url 'comment_delete' pk=comment.pk %}" class="btn btn-sm btn-danger" style="font-size:0.75rem; padding:0.15rem 0.5rem;" onclick="return confirm('Are you sure you want to delete this comment?');">
+                                    Delete
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:var(--text-muted);">No comments yet. Be the first to share your thoughts!</p>
+        {% endif %}
+    </section>
+</article>
+{% endblock %}

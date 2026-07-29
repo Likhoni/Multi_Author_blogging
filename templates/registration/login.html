@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In - Likhoni{% endblock %}
+
+{% block content %}
+<div class="form-card" style="max-width: 440px;">
+    <h1 class="page-title" style="text-align: center; margin-bottom: 0.5rem;">Welcome Back</h1>
+    <p class="page-subtitle" style="text-align: center; margin-bottom: 2rem;">Log in to comment, like posts, or manage articles.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors.0 }}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
+            <input type="text" name="username" class="form-input" id="{{ form.username.id_for_label }}" placeholder="Enter your username" required autofocus>
+            {% if form.username.errors %}
+                <span style="color:#ef4444; font-size:0.825rem;">{{ form.username.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="{{ form.password.id_for_label }}">Password</label>
+            <input type="password" name="password" class="form-input" id="{{ form.password.id_for_label }}" placeholder="Enter your password" required>
+            {% if form.password.errors %}
+                <span style="color:#ef4444; font-size:0.825rem;">{{ form.password.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Log In</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+        Don't have an account? <a href="{% url 'register' %}">Sign up here</a>
+    </div>
+</div>
+{% endblock %}

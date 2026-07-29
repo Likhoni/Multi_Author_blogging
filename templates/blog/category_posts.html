@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Category: {{ category.name }} - Likhoni{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <span class="status-badge status-published">Category</span>
+    <h1 class="page-title" style="margin-top: 0.5rem;">{{ category.name }}</h1>
+    {% if category.description %}
+        <p class="page-subtitle">{{ category.description }}</p>
+    {% endif %}
+</div>
+
+{% if page_obj %}
+    <div class="posts-grid">
+        {% for post in page_obj %}
+            <article class="post-card">
+                <div class="post-card-img-wrapper">
+                    {% if post.featured_image %}
+                        <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="post-card-img">
+                    {% else %}
+                        <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#94a3b8;">No Image</div>
+                    {% endif %}
+                    <span class="category-badge">{{ post.category.name }}</span>
+                </div>
+                
+                <div class="post-card-body">
+                    <h2 class="post-card-title">
+                        <a href="{% url 'post_detail' slug=post.slug %}">{{ post.title }}</a>
+                    </h2>
+                    
+                    <p class="post-card-excerpt">
+                        {{ post.content|truncatewords:25 }}
+                    </p>
+                    
+                    <div class="post-card-footer">
+                        <div>
+                            By <a href="{% url 'author_profile' username=post.author.username %}" class="author-link">{{ post.author.username }}</a>
+                        </div>
+                        <div class="post-meta">
+                            <span>👁️ {{ post.view_count }}</span>
+                            <span>❤️ {{ post.likes.count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <nav class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-link">&laquo; Prev</a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="page-link active">{{ num }}</span>
+                {% else %}
+                    <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="page-link">Next &raquo;</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+
+{% else %}
+    <div style="text-align: center; padding: 4rem 1rem; background: white; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <h3>No posts in this category yet.</h3>
+        <p><a href="{% url 'index' %}">Return to homepage</a></p>
+    </div>
+{% endif %}
+{% endblock %}

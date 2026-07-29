@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Author Dashboard - Likhoni{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+    <div>
+        <h1 class="page-title">Author Dashboard</h1>
+        <p class="page-subtitle">Manage your blog posts, track analytics, and write new stories.</p>
+    </div>
+    <a href="{% url 'post_create' %}" class="btn btn-primary">➕ Create New Post</a>
+</div>
+
+<!-- Analytics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-val">{{ total_posts }}</div>
+        <div class="stat-label">Total Articles</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-val" style="color:#166534;">{{ published_count }}</div>
+        <div class="stat-label">Published Articles</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-val" style="color:#854d0e;">{{ draft_count }}</div>
+        <div class="stat-label">Draft Articles</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-val" style="color:var(--secondary);">{{ total_views }}</div>
+        <div class="stat-label">Total Post Views</div>
+    </div>
+</div>
+
+<!-- Posts Management Table -->
+<h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem;">Your Articles</h2>
+
+{% if posts %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Views</th>
+                    <th>Likes</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in posts %}
+                    <tr>
+                        <td>
+                            <strong><a href="{% url 'post_detail' slug=post.slug %}">{{ post.title }}</a></strong>
+                        </td>
+                        <td>{{ post.category.name }}</td>
+                        <td>
+                            {% if post.status == 'PUBLISHED' %}
+                                <span class="status-badge status-published">Published</span>
+                            {% else %}
+                                <span class="status-badge status-draft">Draft</span>
+                            {% endif %}
+                        </td>
+                        <td>👁️ {{ post.view_count }}</td>
+                        <td>❤️ {{ post.likes.count }}</td>
+                        <td>{{ post.created_at|date:"M j, Y" }}</td>
+                        <td>
+                            <div style="display:flex; gap:0.4rem;">
+                                <a href="{% url 'post_edit' slug=post.slug %}" class="btn btn-sm btn-secondary">Edit</a>
+                                <a href="{% url 'post_delete' slug=post.slug %}" class="btn btn-sm btn-danger">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div style="text-align: center; padding: 4rem 1rem; background: white; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <h3 style="margin-bottom: 0.5rem;">You haven't written any posts yet</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Click below to share your first article with our readers!</p>
+        <a href="{% url 'post_create' %}" class="btn btn-primary">Create First Post</a>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,258 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Site Admin Portal - Likhoni{% endblock %}</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: row;
+        }
+
+        /* Admin Sidebar */
+        .admin-sidebar {
+            width: 260px;
+            background: #1e293b;
+            border-right: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1rem;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .admin-brand {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0 0.5rem;
+        }
+
+        .admin-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .admin-menu-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: #94a3b8;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .admin-menu-item a:hover, .admin-menu-item a.active {
+            background: #334155;
+            color: #ffffff;
+        }
+
+        .admin-menu-item a.active {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* Admin Main Workspace */
+        .admin-main {
+            margin-left: 260px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: #0f172a;
+        }
+
+        .admin-topbar {
+            height: 70px;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .admin-content {
+            padding: 2rem;
+            flex: 1;
+        }
+
+        /* Card overrides for Admin dark theme */
+        .stat-card {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+
+        .stat-label {
+            color: #94a3b8 !important;
+        }
+
+        .table-responsive {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+
+        .data-table th {
+            background: #0f172a !important;
+            color: #94a3b8 !important;
+            border-bottom-color: #334155 !important;
+        }
+
+        .data-table td {
+            border-bottom-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
+
+        .data-table tr:hover {
+            background-color: #334155 !important;
+        }
+
+        .form-card {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+
+        .form-input, .form-select {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+            color: #ffffff !important;
+        }
+
+        .pill {
+            background: #334155;
+            color: #cbd5e1;
+        }
+
+        .pill:hover, .pill.active {
+            background: #4f46e5;
+            color: #ffffff;
+        }
+
+        .alert-success {
+            background-color: #064e3b;
+            color: #a7f3d0;
+            border-color: #065f46;
+        }
+
+        .alert-error, .alert-danger {
+            background-color: #7f1d1d;
+            color: #fecaca;
+            border-color: #991b1b;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar">
+        <div class="admin-brand">
+            👑 Admin Portal
+        </div>
+
+        <ul class="admin-menu">
+            <li class="admin-menu-item">
+                <a href="{% url 'admin_dashboard' %}?tab=overview" class="{% if tab == 'overview' or not tab %}active{% endif %}">
+                    📊 Overview
+                </a>
+            </li>
+            <li class="admin-menu-item">
+                <a href="{% url 'admin_dashboard' %}?tab=posts" class="{% if tab == 'posts' %}active{% endif %}">
+                    📝 Articles CRUD
+                </a>
+            </li>
+            <li class="admin-menu-item">
+                <a href="{% url 'admin_dashboard' %}?tab=users" class="{% if tab == 'users' %}active{% endif %}">
+                    👥 Users & Roles
+                </a>
+            </li>
+            <li class="admin-menu-item">
+                <a href="{% url 'admin_dashboard' %}?tab=categories" class="{% if tab == 'categories' %}active{% endif %}">
+                    📁 Categories CRUD
+                </a>
+            </li>
+            <li class="admin-menu-item">
+                <a href="{% url 'admin_dashboard' %}?tab=tags" class="{% if tab == 'tags' %}active{% endif %}">
+                    🏷️ Tags CRUD
+                </a>
+            </li>
+            <li class="admin-menu-item">
+                <a href="{% url 'admin_dashboard' %}?tab=comments" class="{% if tab == 'comments' %}active{% endif %}">
+                    💬 Comments Moderation
+                </a>
+            </li>
+        </ul>
+
+        <div style="padding-top: 1rem; border-top: 1px solid #334155; display:flex; flex-direction:column; gap:0.5rem;">
+            <a href="{% url 'index' %}" class="btn btn-secondary" style="background:#334155; color:#ffffff; border:none; width:100%; justify-content:center;">
+                🏠 Back to Main Site
+            </a>
+            <a href="{% url 'logout' %}" class="btn btn-danger btn-sm" style="width:100%; justify-content:center;">
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <div class="admin-main">
+        <!-- Topbar -->
+        <header class="admin-topbar">
+            <div style="font-weight: 600; color: #94a3b8;">
+                Welcome, <span style="color:#ffffff;">{{ user.username }}</span> (Super Administrator)
+            </div>
+
+            <div style="display: flex; gap: 0.75rem;">
+                <a href="{% url 'post_create' %}" class="btn btn-sm btn-primary">✏️ Write Post</a>
+                <a href="/admin/" target="_blank" class="btn btn-sm btn-secondary" style="background:#334155; color:#ffffff; border:none;">⚡ Django Admin</a>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <main class="admin-content">
+            {% if messages %}
+                <div style="margin-bottom: 1.5rem;">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

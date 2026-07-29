@@ -1,0 +1,295 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Site Admin Portal - Likhoni{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 2rem; font-weight: 800; color: #ffffff;">Platform Control Center</h1>
+    <p style="color: #94a3b8; font-size: 1rem;">Full administrative management over users, articles, categories, tags, and comments.</p>
+</div>
+
+<!-- Key Metrics Grid -->
+<div class="stats-grid" style="margin-bottom: 2.5rem;">
+    <div class="stat-card">
+        <div class="stat-val" style="color:#818cf8;">{{ total_users }}</div>
+        <div class="stat-label">Total Registered Users</div>
+        <div style="font-size:0.8rem; color:#94a3b8; margin-top:0.3rem;">
+            👤 {{ authors_count }} Authors | 📖 {{ readers_count }} Readers
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-val" style="color:#34d399;">{{ total_posts }}</div>
+        <div class="stat-label">Total Articles</div>
+        <div style="font-size:0.8rem; color:#94a3b8; margin-top:0.3rem;">
+            ✅ {{ published_posts_count }} Published | 📝 {{ draft_posts_count }} Drafts
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-val" style="color:#38bdf8;">{{ categories.count }} / {{ tags.count }}</div>
+        <div class="stat-label">Categories / Tags</div>
+        <div style="font-size:0.8rem; color:#94a3b8; margin-top:0.3rem;">
+            Taxonomy Management
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-val" style="color:#fbbf24;">{{ comments.count }}</div>
+        <div class="stat-label">Total Comments</div>
+        <div style="font-size:0.8rem; color:#94a3b8; margin-top:0.3rem;">
+            👁️ {{ total_views }} Cumulative Post Views
+        </div>
+    </div>
+</div>
+
+<!-- TAB 1: OVERVIEW & POSTS MANAGEMENT -->
+{% if tab == 'posts' or tab == 'overview' or not tab %}
+    <section style="margin-bottom: 3rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h2 style="font-size: 1.35rem; font-weight: 700; color:#ffffff;">All Platform Articles</h2>
+            <a href="{% url 'post_create' %}" class="btn btn-sm btn-primary">➕ New Post</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Views</th>
+                        <th>Likes</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in all_posts %}
+                        <tr>
+                            <td>
+                                <strong><a href="{% url 'post_detail' slug=post.slug %}" style="color:#6366f1;">{{ post.title }}</a></strong>
+                            </td>
+                            <td>
+                                <a href="{% url 'author_profile' username=post.author.username %}" style="color:#cbd5e1;">{{ post.author.username }}</a>
+                            </td>
+                            <td>{{ post.category.name }}</td>
+                            <td>
+                                {% if post.status == 'PUBLISHED' %}
+                                    <span class="status-badge status-published">Published</span>
+                                {% else %}
+                                    <span class="status-badge status-draft">Draft</span>
+                                {% endif %}
+                            </td>
+                            <td>👁️ {{ post.view_count }}</td>
+                            <td>❤️ {{ post.likes.count }}</td>
+                            <td>{{ post.created_at|date:"M j, Y" }}</td>
+                            <td>
+                                <div style="display:flex; gap:0.35rem;">
+                                    <a href="{% url 'admin_post_toggle_status' slug=post.slug %}" class="btn btn-sm btn-secondary" style="font-size:0.75rem; background:#334155; color:#fff;">
+                                        {% if post.status == 'PUBLISHED' %}Unpublish{% else %}Publish{% endif %}
+                                    </a>
+                                    <a href="{% url 'post_edit' slug=post.slug %}" class="btn btn-sm btn-secondary" style="font-size:0.75rem; background:#334155; color:#fff;">Edit</a>
+                                    <a href="{% url 'post_delete' slug=post.slug %}" class="btn btn-sm btn-danger" style="font-size:0.75rem;">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endif %}
+
+<!-- TAB 2: USERS & ROLES MANAGEMENT -->
+{% if tab == 'users' or tab == 'overview' or not tab %}
+    <section style="margin-bottom: 3rem;">
+        <h2 style="font-size: 1.35rem; font-weight: 700; color:#ffffff; margin-bottom: 1rem;">Platform Users & Role Management</h2>
+        
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Date Joined</th>
+                        <th>Posts Written</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in all_users %}
+                        <tr>
+                            <td>
+                                <strong style="color:#ffffff;">{{ u.username }}</strong>
+                                {% if u.is_superuser %}
+                                    <span class="role-badge role-admin" style="font-size:0.65rem;">Superuser</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ u.email|default:"N/A" }}</td>
+                            <td>
+                                {% if u.is_author %}
+                                    <span class="role-badge role-author">Author</span>
+                                {% else %}
+                                    <span class="role-badge role-reader">Reader</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ u.date_joined|date:"M j, Y" }}</td>
+                            <td>{{ u.posts.count }}</td>
+                            <td>
+                                {% if not u.is_superuser %}
+                                    <a href="{% url 'admin_user_toggle_author' pk=u.pk %}" class="btn btn-sm {% if u.is_author %}btn-secondary{% else %}btn-primary{% endif %}" style="font-size:0.75rem;">
+                                        {% if u.is_author %}Revoke Author{% else %}Promote to Author{% endif %}
+                                    </a>
+                                {% else %}
+                                    <span style="color:#94a3b8; font-size:0.8rem;">Site Admin</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endif %}
+
+<!-- TAB 3: CATEGORIES CRUD -->
+{% if tab == 'categories' %}
+    <section style="margin-bottom: 3rem;">
+        <div style="display:grid; grid-template-columns: 1fr 340px; gap:2rem;">
+            <div>
+                <h2 style="font-size: 1.35rem; font-weight: 700; color:#ffffff; margin-bottom: 1rem;">Categories List</h2>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Slug</th>
+                                <th>Post Count</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cat in categories %}
+                                <tr>
+                                    <td><strong style="color:#ffffff;">{{ cat.name }}</strong></td>
+                                    <td><code>{{ cat.slug }}</code></td>
+                                    <td>{{ cat.posts.count }} posts</td>
+                                    <td>
+                                        <div style="display:flex; gap:0.35rem;">
+                                            <a href="{% url 'admin_category_edit' pk=cat.pk %}" class="btn btn-sm btn-secondary" style="font-size:0.75rem; background:#334155; color:#fff;">Edit</a>
+                                            <a href="{% url 'admin_category_delete' pk=cat.pk %}" class="btn btn-sm btn-danger" style="font-size:0.75rem;" onclick="return confirm('Delete category {{ cat.name }}?');">Delete</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Create Category Form -->
+            <div class="form-card" style="margin:0; padding:1.5rem;">
+                <h3 style="font-size:1.1rem; font-weight:700; color:#ffffff; margin-bottom:1rem;">Add New Category</h3>
+                <form action="{% url 'admin_category_create' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label" style="color:#cbd5e1;">Category Name</label>
+                        {{ category_form.name }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="color:#cbd5e1;">Description</label>
+                        {{ category_form.description }}
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Create Category</button>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endif %}
+
+<!-- TAB 4: TAGS CRUD -->
+{% if tab == 'tags' %}
+    <section style="margin-bottom: 3rem;">
+        <div style="display:grid; grid-template-columns: 1fr 320px; gap:2rem;">
+            <div>
+                <h2 style="font-size: 1.35rem; font-weight: 700; color:#ffffff; margin-bottom: 1rem;">Tags List</h2>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Slug</th>
+                                <th>Post Count</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tag_obj in tags %}
+                                <tr>
+                                    <td><strong style="color:#ffffff;">#{{ tag_obj.name }}</strong></td>
+                                    <td><code>{{ tag_obj.slug }}</code></td>
+                                    <td>{{ tag_obj.posts.count }} posts</td>
+                                    <td>
+                                        <a href="{% url 'admin_tag_delete' pk=tag_obj.pk %}" class="btn btn-sm btn-danger" style="font-size:0.75rem;" onclick="return confirm('Delete tag #{{ tag_obj.name }}?');">Delete</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Create Tag Form -->
+            <div class="form-card" style="margin:0; padding:1.5rem;">
+                <h3 style="font-size:1.1rem; font-weight:700; color:#ffffff; margin-bottom:1rem;">Add New Tag</h3>
+                <form action="{% url 'admin_tag_create' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label" style="color:#cbd5e1;">Tag Name</label>
+                        {{ tag_form.name }}
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Create Tag</button>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endif %}
+
+<!-- TAB 5: COMMENTS MODERATION -->
+{% if tab == 'comments' %}
+    <section style="margin-bottom: 3rem;">
+        <h2 style="font-size: 1.35rem; font-weight: 700; color:#ffffff; margin-bottom: 1rem;">Comments Moderation</h2>
+        
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Article</th>
+                        <th>Comment Text</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in comments %}
+                        <tr>
+                            <td><strong style="color:#ffffff;">{{ c.user.username }}</strong></td>
+                            <td><a href="{% url 'post_detail' slug=c.post.slug %}" style="color:#818cf8;">{{ c.post.title|truncatewords:6 }}</a></td>
+                            <td>{{ c.text|truncatewords:15 }}</td>
+                            <td>{{ c.created_at|date:"M j, Y - g:i A" }}</td>
+                            <td>
+                                <a href="{% url 'comment_delete' pk=c.pk %}" class="btn btn-sm btn-danger" style="font-size:0.75rem;" onclick="return confirm('Delete this comment?');">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Deletion - Likhoni{% endblock %}
+
+{% block content %}
+<div class="form-card" style="text-align: center; max-width: 500px;">
+    <h1 style="color:#ef4444; font-size:1.75rem; margin-bottom:1rem;">Delete Article?</h1>
+    <p style="margin-bottom: 1.5rem; color:var(--text-muted);">
+        Are you sure you want to permanently delete <strong>"{{ post.title }}"</strong>? This action cannot be undone.
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button type="submit" class="btn btn-danger">Yes, Delete Article</button>
+            <a href="{% url 'author_dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - Likhoni{% endblock %}
+
+{% block content %}
+<div class="form-card" style="max-width: 500px;">
+    <h1 class="page-title" style="text-align: center; margin-bottom: 0.5rem;">Join Likhoni</h1>
+    <p class="page-subtitle" style="text-align: center; margin-bottom: 2rem;">Create your Reader account to comment and like articles.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <span style="display:block; font-size:0.775rem; color:var(--text-muted); margin-top:0.2rem;">{{ field.help_text }}</span>
+                {% endif %}
+                {% if field.errors %}
+                    <span style="color:#ef4444; font-size:0.825rem;">{{ field.errors.0 }}</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Create Account</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+        Already have an account? <a href="{% url 'login' %}">Log in here</a>
+    </div>
+</div>
+{% endblock %}
